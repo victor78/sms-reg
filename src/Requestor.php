@@ -104,7 +104,7 @@ class Requestor
      * @throws Exceptions\ValidationException
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function getOperations(?string $opstate = null, ?int $count = null, ?string $output = null)
+    public function getOperations(?string $opstate = null, ?int $count = null, ?string $output = null): array
     {
         $params = [];
         if ($opstate)
