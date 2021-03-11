@@ -1,5 +1,5 @@
 # Sms-reg PHP API SDK
-Удобная обертка для запросов к API sms-reg.com
+Клиент для запросов к API sms-reg.com
 
 ## Установка
 
@@ -34,3 +34,8 @@ vendor/bin/phpunit
 ```
  
 Для проверки со своим API KEY, в phpunit.xml указать актуальное значение **PHPUNIT_SMSREG_APIKEY**. 
+
+## Другое
+
+Клиент существует также в виде компонента фреймворка Yii2:
+https://github.com/victor78/yii2-sms-reg 
