@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/5.7/phpunit.xsd"
-         bootstrap="vendor/autoload.php"
+         bootstrap="tests/bootstrap.php"
+         colors="true"
          backupGlobals="false"
          beStrictAboutCoversAnnotation="true"
          beStrictAboutOutputDuringTests="true"
@@ -11,11 +12,13 @@
     <testsuite name="default">
         <directory suffix="Test.php">tests</directory>
     </testsuite>
-
     <filter>
         <whitelist processUncoveredFilesFromWhitelist="true">
             <directory suffix=".php">src</directory>
         </whitelist>
+        <blacklist>
+            <directory suffix=".php">vendor</directory>
+        </blacklist>
     </filter>
     <php>
         <const name="PHPUNIT_SMSREG_APIKEY" value="z64hj45276ug9jldijectxm0s8i4mimb"/>
