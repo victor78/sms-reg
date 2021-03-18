@@ -18,17 +18,31 @@ class RequestException extends BaseException
         'Rate change can be made when all current operations finished' => "Изменение ставки возможно после завершения всех операций",
     ];
 
+    /**
+     * RequestException constructor.
+     *
+     * @param string         $error_message
+     * @param int            $code
+     * @param Throwable|null $previous
+     */
     public function __construct(string $error_message, int $code = 0, Throwable $previous = null)
     {
+        parent::__construct($this->generateMessage($error_message), $code, $previous);
+    }
 
-        $client_error_message = 'Ошибка при обращении к API SMS-REG.com: ';
+    /**
+     * @param string $error_message
+     *
+     * @return string
+     */
+    private function generateMessage(string $error_message): string
+    {
+        $error_message_prefix = 'Ошибка при обращении к API SMS-REG.com: ';
+
         if (isset(self::$message_map[$error_message]))
         {
-            $client_error_message .= self::$message_map[$error_message];
-        } else {
-            $client_error_message .= $error_message;
+            $error_message = self::$message_map[$error_message];
         }
-
-        parent::__construct($client_error_message, $code, $previous);
+        return $error_message_prefix . $error_message;
     }
 }
