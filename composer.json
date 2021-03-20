@@ -1,7 +1,7 @@
 {
   "name": "victor78/sms-reg",
   "description": "SDK for sms-reg API - обертка для работы с API sms-reg.com",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "type": "library",
   "keywords": ["sms-reg", "sdk", "api"],
   "license": "Apache-2.0",
