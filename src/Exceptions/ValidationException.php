@@ -8,7 +8,8 @@ use Symfony\Component\Validator\ConstraintViolationListInterface;
 
 class ValidationException extends BaseException
 {
-    public static function createFromViolationList(ConstraintViolationListInterface $violationList, ?string $className): self
+
+    public function setMessageFromViolationList(ConstraintViolationListInterface $violationList, ?string $className): self
     {
         $text = "Ошибка валидации $className. ";
         /**
@@ -20,9 +21,8 @@ class ValidationException extends BaseException
             $text .= 'Параметр ' . $violation->getPropertyPath() . ': "' . $violation->getMessage() . '" ';
         }
 
+        $this->message = $text;
 
-
-        $exception = new self($text);
-        return $exception;
+        return $this;
     }
 }
