@@ -4,7 +4,7 @@ namespace Victor78\SmsReg;
 
 
 /**
- * Class Requestor
+ * Interface RequestorInterface
  * @package Victor78\SmsReg
  * @link    https://sms-reg.com/docs/API.html Sms-reg documentantion
  * @method array getNum(string $service, string $country = '')
