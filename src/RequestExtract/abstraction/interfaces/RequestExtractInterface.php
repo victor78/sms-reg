@@ -2,8 +2,6 @@
 
 namespace Victor78\SmsReg\RequestExtract\abstraction\interfaces;
 
-use Symfony\Component\Validator\Validator\ValidatorInterface;
-
 interface RequestExtractInterface
 {
     /**
@@ -30,10 +28,8 @@ interface RequestExtractInterface
     public function getEndpointUrl(): string;
 
     /**
-     * @param ValidatorInterface $validator
-     *
      * @return RequestExtractInterface
      */
-    public function setValidator(ValidatorInterface $validator): RequestExtractInterface;
+    public function enableValidation(): RequestExtractInterface;
 
 }
