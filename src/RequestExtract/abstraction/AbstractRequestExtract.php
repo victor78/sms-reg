@@ -3,9 +3,12 @@
 
 namespace Victor78\SmsReg\RequestExtract\abstraction;
 
+use Symfony\Component\Validator\Mapping\Loader\StaticMethodLoader;
+use Symfony\Component\Validator\Validation;
 use Victor78\SmsReg\Exceptions\ValidationException;
 use Victor78\SmsReg\RequestExtract\abstraction\interfaces\RequestExtractInterface;
 use \Symfony\Component\Validator\Validator\ValidatorInterface;
+use Victor78\SmsReg\Translation\RuTranslatorFabric;
 
 abstract class AbstractRequestExtract implements RequestExtractInterface
 {
@@ -31,6 +34,11 @@ abstract class AbstractRequestExtract implements RequestExtractInterface
     protected $validator = null;
 
     /**
+     * @var ValidatorInterface|null
+     */
+    private $inputValidator = null;
+
+    /**
      * AbstractRequestExtract constructor.
      *
      * @param string      $base_url
@@ -50,6 +58,7 @@ abstract class AbstractRequestExtract implements RequestExtractInterface
      * @param array $params
      *
      * @return RequestExtractInterface
+     * @throws ValidationException
      * @throws \ReflectionException
      */
     public function loadParams(array $params): RequestExtractInterface
@@ -62,16 +71,22 @@ abstract class AbstractRequestExtract implements RequestExtractInterface
         foreach ($params as $key => $value)
         {
             $field = $propertiesNames[$key];
-            $this->{$field} = $value;
-            $this->params[$field] = $value;
+            $this->loadParam($field, $value);
         }
+        $this->validate(true);
         return $this;
     }
 
-    public function loadParam(string $name, string $value): RequestExtractInterface
+    /**
+     * @param string $field
+     * @param        $value
+     *
+     * @return RequestExtractInterface
+     */
+    public function loadParam(string $field, $value): RequestExtractInterface
     {
-        $this->{$name} = $value;
-        $this->params[$name] = $value;
+        $this->{$field} = $value;
+        $this->params[$field] = $value;
         return $this;
     }
 
@@ -97,14 +112,54 @@ abstract class AbstractRequestExtract implements RequestExtractInterface
     /**
      * @param ValidatorInterface|null $validator
      *
-     * @return RequestExtractInterface
+     * @return AbstractRequestExtract
      */
-    public function setValidator(?ValidatorInterface $validator): RequestExtractInterface
+    private function setValidator(?ValidatorInterface $validator): self
     {
         $this->validator = $validator;
         return $this;
     }
 
+
+    /**
+     * @param ValidatorInterface $inputValidator
+     *
+     * @return AbstractRequestExtract
+     */
+    private function setInputValidator(ValidatorInterface $inputValidator): self
+    {
+        $this->inputValidator = $inputValidator;
+        return $this;
+    }
+
+    /**
+     * @return ValidatorInterface|null
+     */
+    public function getInputValidator(): ?ValidatorInterface
+    {
+        return $this->inputValidator;
+    }
+
+
+    /**
+     * @return RequestExtractInterface
+     */
+    public function enableValidation(): RequestExtractInterface
+    {
+        $translator = RuTranslatorFabric::create();
+        $validator = Validation::createValidatorBuilder()
+            ->addLoader(new StaticMethodLoader())
+            ->setTranslator($translator)
+            ->getValidator();
+        $inputValidator = Validation::createValidatorBuilder()
+            ->addLoader(new StaticMethodLoader('loadInputValidatorMetadata'))
+            ->setTranslator($translator)
+            ->getValidator();
+
+        $this->setValidator($validator)->setInputValidator($inputValidator);
+
+        return $this;
+    }
 
     /**
      * @return array
@@ -120,19 +175,23 @@ abstract class AbstractRequestExtract implements RequestExtractInterface
     }
 
     /**
+     * @param bool $input
+     *
      * @throws ValidationException
      * @throws \ReflectionException
      */
-    protected function validate(): void
+    protected function validate(bool $input = false): void
     {
-        if ($this->validator)
-        {
-            $violations = $this->validator->validate($this);
+        $validator = $input ? $this->getInputValidator() : $this->getValidator();
 
+        if ($validator)
+        {
+            $violations = $validator->validate($this);
             if ($violations->count())
             {
                 $class = (new \ReflectionClass($this))->getShortName();
-                throw ValidationException::createFromViolationList($violations, $class);
+                $exception = (new ValidationException())->setMessageFromViolationList($violations, $class);
+                throw $exception;
             }
         }
     }
@@ -196,6 +255,14 @@ abstract class AbstractRequestExtract implements RequestExtractInterface
         $this->api_key = $api_key;
 
         return $this;
+    }
+
+    /**
+     * @return ValidatorInterface|null
+     */
+    protected function getValidator(): ?ValidatorInterface
+    {
+        return $this->validator;
     }
 
 
