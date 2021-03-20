@@ -48,7 +48,7 @@ class Requestor extends AbstractRequestor implements RequestorInterface
 
     /**
      * @param string $shortClassName
-     * @param        $arguments
+     * @param array  $params
      *
      * @return RequestExtractInterface
      * @throws ValidationException
@@ -63,14 +63,12 @@ class Requestor extends AbstractRequestor implements RequestorInterface
         }
         /** @var RequestExtractInterface $extract */
         $extract = new $extractClass(static::$base_url, $this->getApiKey(), $this->getDevKey());
+        if ($this->isEnabledValidation())
+        {
+            $extract->enableValidation();
+        }
         $extract->loadParams($params);
-        $extract->setValidator($this->getValidator());
 
         return $extract;
     }
-
-
-
-
-
 }

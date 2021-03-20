@@ -3,12 +3,8 @@
 
 namespace Victor78\SmsReg;
 
-use Symfony\Component\Validator\Mapping\Loader\StaticMethodLoader;
-use Symfony\Component\Validator\Validation;
 use Victor78\SmsReg\Exceptions\RequestException;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Victor78\SmsReg\RequestExtract\abstraction\interfaces\RequestExtractInterface;
-use Victor78\SmsReg\Translation\RuTranslatorFabric;
 
 abstract class AbstractRequestor implements RequestorInterface
 {
@@ -22,21 +18,23 @@ abstract class AbstractRequestor implements RequestorInterface
     /** @var string $dev_key */
     private $dev_key;
 
-    /** @var ValidatorInterface */
-    private $validator;
+    /**
+     * @var bool
+     */
+    private $enabledValidation;
 
     /**
      * AbstractRequestor constructor.
      *
-     * @param string                  $api_key
-     * @param string|null             $dev_key
-     * @param ValidatorInterface|null $validator
+     * @param string      $api_key
+     * @param string|null $dev_key
+     * @param bool        $enabledValidation
      */
-    public function __construct(string $api_key, ?string $dev_key = null, ?ValidatorInterface $validator = null)
+    public function __construct(string $api_key, ?string $dev_key = null, bool $enabledValidation = true)
     {
         $this->setApiKey($api_key)
             ->setDevKey($dev_key)
-            ->setValidator($validator);
+            ->setEnabledValidation($enabledValidation);
     }
 
     /**
@@ -53,7 +51,6 @@ abstract class AbstractRequestor implements RequestorInterface
 
 
         $url = $extract->getEndpointUrl();
-//echo $url . PHP_EOL;
         $response = $client->request('GET', $url);
         $response_body = $response->getBody();
         $response_array = json_decode($response_body, true);
@@ -100,7 +97,7 @@ abstract class AbstractRequestor implements RequestorInterface
     /**
      * @param string $api_key
      *
-     * @return RequestorInterface
+     * @return RequestorInterface|AbstractRequestor
      */
     protected function setApiKey(string $api_key): AbstractRequestor
     {
@@ -123,27 +120,23 @@ abstract class AbstractRequestor implements RequestorInterface
     }
 
     /**
-     * @param ValidatorInterface $validator
+     * @param bool $enabledValidation
      *
-     * @return Requestor
+     * @return AbstractRequestor
      */
-    protected function setValidator(?ValidatorInterface $validator): AbstractRequestor
+    protected function setEnabledValidation(bool $enabledValidation): AbstractRequestor
     {
-        $this->validator = $validator;
+        $this->enabledValidation = $enabledValidation;
 
         return $this;
     }
 
     /**
-     * @return ValidatorInterface|null
+     * @return bool
      */
-    protected function getValidator(): ?ValidatorInterface
+    protected function isEnabledValidation(): bool
     {
-        $translator = RuTranslatorFabric::create();
-        $validator = Validation::createValidatorBuilder()
-            ->addLoader(new StaticMethodLoader())
-            ->setTranslator($translator)
-            ->getValidator();
-        return $validator;
+        return $this->enabledValidation;
     }
+
 }
