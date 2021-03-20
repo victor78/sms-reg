@@ -3,8 +3,6 @@
 namespace Victor78\SmsReg;
 
 
-use Victor78\SmsReg\Exceptions\RequestException;
-
 /**
  * Class Requestor
  * @package Victor78\SmsReg
